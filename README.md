@@ -1,8 +1,8 @@
-# 🎥 Interview Proctoring Application
+# ?? Interview Proctoring Application
 
 A comprehensive Next.js interview proctoring system with PostgreSQL integration, real-time face detection, advanced eye movement tracking, and intelligent violation monitoring.
 
-## 🚀 Quick Start
+## ?? Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -30,58 +30,58 @@ Visit http://localhost:3000/setup and click "Setup Database"
 ### 5. Start Interview
 Visit http://localhost:3000
 
-## 📋 Prerequisites
+## ?? Prerequisites
 
 - **Node.js** 18+ (Latest LTS recommended)
 - **PostgreSQL** 12+ (Database server)
 - **Webcam** (HD camera recommended for accurate face detection)
 - **Modern Browser** (Chrome, Edge, or Firefox with WebRTC support)
 
-## 🎯 Features
+## ?? Features
 
 ### Core Functionality
-- ✅ **User Registration** - Complete candidate information with resume upload
-- ✅ **Identity Verification** - Face capture and biometric verification
-- ✅ **10 Timed Questions** - 5 minutes per question with auto-submission
-- ✅ **PostgreSQL Integration** - Robust database with full CRUD operations
-- ✅ **Web-Based Setup** - Easy database initialization via UI
+- ? **User Registration** - Complete candidate information with resume upload
+- ? **Identity Verification** - Face capture and biometric verification
+- ? **10 Timed Questions** - 5 minutes per question with auto-submission
+- ? **PostgreSQL Integration** - Robust database with full CRUD operations
+- ? **Web-Based Setup** - Easy database initialization via UI
 
 ### Advanced Proctoring Features
-- 🎥 **Real-time Face Detection** - Continuous monitoring during interview
-- 👁️ **Eye Movement Tracking** - Advanced gaze direction monitoring
-- 😐 **Blink Detection** - Eye Aspect Ratio (EAR) based blink tracking
-- 🔄 **Rapid Eye Movement Detection** - Flags suspicious eye patterns
-- 📊 **Eye Position Tracking** - Monitors horizontal & vertical eye movements
-- 🚫 **Tab/Window Switch Detection** - Instant violation alerts
-- 👥 **Multiple Face Detection** - Prevents proxy interviews
-- 🔐 **Identity Mismatch Detection** - Continuous face verification
+- ?? **Real-time Face Detection** - Continuous monitoring during interview
+- ??? **Eye Movement Tracking** - Advanced gaze direction monitoring
+- ?? **Blink Detection** - Eye Aspect Ratio (EAR) based blink tracking
+- ?? **Rapid Eye Movement Detection** - Flags suspicious eye patterns
+- ?? **Eye Position Tracking** - Monitors horizontal & vertical eye movements
+- ?? **Tab/Window Switch Detection** - Instant violation alerts
+- ?? **Multiple Face Detection** - Prevents proxy interviews
+- ?? **Identity Mismatch Detection** - Continuous face verification
 
 ### Violation Management
-- ⚠️ **Progressive Warning System** - Escalating alerts for violations
-- 🛑 **Auto-Termination** - Critical violations end interview immediately
-- 📝 **Detailed Logging** - All violations recorded with timestamps
-- 📈 **Real-time Metrics** - Live EAR values and eye status display
+- ?? **Progressive Warning System** - Escalating alerts for violations
+- ?? **Auto-Termination** - Critical violations end interview immediately
+- ?? **Detailed Logging** - All violations recorded with timestamps
+- ?? **Real-time Metrics** - Live EAR values and eye status display
 
-## 📁 Project Structure
+## ?? Project Structure
 
 ```
 interview-proctoring-app/
-├── app/
-│   ├── api/              # API routes
-│   ├── components/       # React components
-│   ├── setup/           # Database setup page
-│   ├── layout.tsx       # Root layout
-│   └── page.tsx         # Home page
-├── lib/
-│   ├── db.ts            # Database connection
-│   └── models/          # Database models
-├── public/
-│   └── uploads/         # File uploads
-├── .env.local           # Environment variables
-└── package.json
++-- app/
+�   +-- api/              # API routes
+�   +-- components/       # React components
+�   +-- setup/           # Database setup page
+�   +-- layout.tsx       # Root layout
+�   +-- page.tsx         # Home page
++-- lib/
+�   +-- db.ts            # Database connection
+�   +-- models/          # Database models
++-- public/
+�   +-- uploads/         # File uploads
++-- .env.local           # Environment variables
++-- package.json
 ```
 
-## 🔧 API Endpoints
+## ?? API Endpoints
 
 ### Database Setup
 - `GET /api/setup/database` - Initialize database tables
@@ -92,7 +92,7 @@ interview-proctoring-app/
 - `POST /api/interview/verify-identity` - Verify candidate identity with face capture
 - `POST /api/interview/submit` - Submit completed/terminated interview
 
-## 📊 Database Tables
+## ?? Database Tables
 
 ### `interviews`
 Stores candidate information and interview session data
@@ -120,7 +120,7 @@ Interview responses
 - Candidate's answer
 - Time spent per question
 
-## 🛠️ Development
+## ??? Development
 
 ```bash
 # Development mode with hot reload
@@ -139,7 +139,7 @@ npx tsc --noEmit
 npm run lint
 ```
 
-## 🧪 Testing the System
+## ?? Testing the System
 
 ### Test Eye Tracking
 1. Start interview and complete identity verification
@@ -154,7 +154,7 @@ npm run lint
 - **No Face**: Cover camera or move away
 - **Different Person**: Try to replace candidate mid-interview
 
-## 📝 Environment Variables
+## ?? Environment Variables
 
 Create a `.env.local` file in the root directory:
 
@@ -173,7 +173,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/testing
 NODE_ENV=development
 ```
 
-## 💡 How It Works
+## ?? How It Works
 
 ### Eye Aspect Ratio (EAR) Formula
 ```
@@ -194,7 +194,7 @@ Where p1-p6 are eye landmark points. EAR < 0.25 indicates closed eyes.
 - **High**: Serious violations, logged (e.g., face not detected)
 - **Critical**: Interview terminated immediately (e.g., tab switch, multiple faces)
 
-## 🔒 Security Features
+## ?? Security Features
 
 ### Face Recognition
 - **Real-time Face Detection** - Continuous monitoring using face-api.js
@@ -212,7 +212,7 @@ Where p1-p6 are eye landmark points. EAR < 0.25 indicates closed eyes.
 
 ### Violation Detection
 - **Tab/Window Switching** - Instant critical violation
-- **Looking Away Detection** - Progressive warnings (6s → 12s → terminate)
+- **Looking Away Detection** - Progressive warnings (6s ? 12s ? terminate)
 - **Rapid Eye Movements** - Flags potential cheating (3 detections)
 - **Prolonged Eye Closure** - Detects eyes closed > 6 seconds
 - **No Face Detected** - High severity violation
@@ -231,7 +231,7 @@ Where p1-p6 are eye landmark points. EAR < 0.25 indicates closed eyes.
 2. **Second Offense** (12 seconds) - Critical violation logged
 3. **Third Offense** - Interview auto-terminated
 
-## 📞 Support
+## ?? Support
 
 ### Troubleshooting
 
@@ -258,7 +258,7 @@ Where p1-p6 are eye landmark points. EAR < 0.25 indicates closed eyes.
 
 For more details, check the troubleshooting section in [NEXTJS-README.md](NEXTJS-README.md)
 
-## 🚀 Deployment
+## ?? Deployment
 
 ### Production Checklist
 - [ ] Set `NODE_ENV=production`
@@ -275,7 +275,7 @@ For more details, check the troubleshooting section in [NEXTJS-README.md](NEXTJS
 - **AWS/Azure** - Enterprise solutions
 - **Heroku** - Quick prototyping
 
-## 📈 Future Enhancements
+## ?? Future Enhancements
 
 - [ ] Audio analysis for voice detection
 - [ ] Screen recording capability
@@ -287,7 +287,7 @@ For more details, check the troubleshooting section in [NEXTJS-README.md](NEXTJS
 - [ ] Background noise detection
 - [ ] Lip movement sync detection
 
-## 🤝 Contributing
+## ?? Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -297,11 +297,11 @@ Contributions are welcome! Please follow these steps:
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## ?? License
 
 This project is for educational and demonstration purposes. Ensure compliance with local privacy laws and regulations when using biometric data.
 
-## ⚠️ Privacy & Ethics
+## ?? Privacy & Ethics
 
 **Important Considerations:**
 - Obtain explicit consent for biometric data collection
@@ -311,7 +311,7 @@ This project is for educational and demonstration purposes. Ensure compliance wi
 - Ensure accessibility for candidates with disabilities
 - Regular audits of false positive rates
 
-## 🎓 Technologies Used
+## ?? Technologies Used
 
 - **Next.js 14** - React framework with App Router
 - **React 18** - UI library
@@ -321,7 +321,7 @@ This project is for educational and demonstration purposes. Ensure compliance wi
 - **Tailwind CSS** - Styling
 - **Lucide React** - Icons
 
-## 📊 Performance Metrics
+## ?? Performance Metrics
 
 - Face detection: ~50-100ms per frame
 - Eye tracking: Real-time (3s intervals)
@@ -332,6 +332,3 @@ This project is for educational and demonstration purposes. Ensure compliance wi
 ---
 
 Built with Next.js 14, React 18, and PostgreSQL
-#   I n t e r v i e w - P r o c t o r i n g - A p p l i c a t i o n 
- 
- 
