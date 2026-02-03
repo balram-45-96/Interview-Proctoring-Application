@@ -84,9 +84,14 @@ export default function InterviewProctor() {
   const [currentFaceStatus, setCurrentFaceStatus] = useState<string>('Checking...');
   const [eyeStatus, setEyeStatus] = useState<string>('Monitoring...');
   const [consecutiveEyeViolations, setConsecutiveEyeViolations] = useState(0);
+  const [blinkCount, setBlinkCount] = useState(0);
+  const [rapidEyeMovements, setRapidEyeMovements] = useState(0);
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
+  const previousEyePositionRef = useRef<{ left: {x: number, y: number}, right: {x: number, y: number} } | null>(null);
+  const lastBlinkTimeRef = useRef<number>(Date.now());
+  const eyeClosedCountRef = useRef<number>(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -250,7 +255,27 @@ export default function InterviewProctor() {
     }
   };
 
-  // Check eye gaze direction
+  // Calculate Eye Aspect Ratio for blink detection
+  const calculateEyeAspectRatio = (eye: faceapi.Point[]) => {
+    // Vertical eye distances
+    const verticalDist1 = Math.sqrt(
+      Math.pow(eye[1].x - eye[5].x, 2) + Math.pow(eye[1].y - eye[5].y, 2)
+    );
+    const verticalDist2 = Math.sqrt(
+      Math.pow(eye[2].x - eye[4].x, 2) + Math.pow(eye[2].y - eye[4].y, 2)
+    );
+    
+    // Horizontal eye distance
+    const horizontalDist = Math.sqrt(
+      Math.pow(eye[0].x - eye[3].x, 2) + Math.pow(eye[0].y - eye[3].y, 2)
+    );
+    
+    // Eye Aspect Ratio
+    const ear = (verticalDist1 + verticalDist2) / (2.0 * horizontalDist);
+    return ear;
+  };
+
+  // Check eye gaze direction and movement
   const checkEyeGaze = (landmarks: faceapi.FaceLandmarks68) => {
     const leftEye = landmarks.getLeftEye();
     const rightEye = landmarks.getRightEye();
@@ -285,10 +310,43 @@ export default function InterviewProctor() {
     const verticalDeviation = Math.abs(noseTip.y - eyeMidpoint.y);
     const normalizedVerticalDeviation = verticalDeviation / eyeDistance;
     
+    // Calculate Eye Aspect Ratio for both eyes
+    const leftEAR = calculateEyeAspectRatio(leftEye);
+    const rightEAR = calculateEyeAspectRatio(rightEye);
+    const avgEAR = (leftEAR + rightEAR) / 2.0;
+    
+    // Detect blinks (EAR threshold typically around 0.2-0.25)
+    const isBlinking = avgEAR < 0.25;
+    
+    // Detect rapid eye movement
+    let rapidMovement = false;
+    if (previousEyePositionRef.current) {
+      const leftMovement = Math.sqrt(
+        Math.pow(leftEyeCenter.x - previousEyePositionRef.current.left.x, 2) +
+        Math.pow(leftEyeCenter.y - previousEyePositionRef.current.left.y, 2)
+      );
+      const rightMovement = Math.sqrt(
+        Math.pow(rightEyeCenter.x - previousEyePositionRef.current.right.x, 2) +
+        Math.pow(rightEyeCenter.y - previousEyePositionRef.current.right.y, 2)
+      );
+      
+      // If eyes moved more than 15 pixels in 3 seconds, it's rapid movement
+      rapidMovement = (leftMovement > 15 || rightMovement > 15);
+    }
+    
+    // Store current eye positions for next comparison
+    previousEyePositionRef.current = {
+      left: leftEyeCenter,
+      right: rightEyeCenter,
+    };
+    
     return {
       lookingAway: normalizedDeviation > 0.3 || normalizedVerticalDeviation > 0.5,
       horizontalDeviation: normalizedDeviation,
       verticalDeviation: normalizedVerticalDeviation,
+      isBlinking,
+      eyeAspectRatio: avgEAR,
+      rapidMovement,
     };
   };
 
@@ -335,11 +393,47 @@ export default function InterviewProctor() {
           } else {
             setCurrentFaceStatus('✅ Identity verified');
             
-            // Check eye gaze
+            // Check eye gaze and movements
             const gazeCheck = checkEyeGaze(detections[0].landmarks);
             
+            // Track blinks
+            if (gazeCheck.isBlinking) {
+              eyeClosedCountRef.current++;
+              if (eyeClosedCountRef.current >= 2) { // Eyes closed for 6+ seconds
+                const timeSinceLastBlink = Date.now() - lastBlinkTimeRef.current;
+                if (timeSinceLastBlink > 5000) { // More than 5 seconds
+                  setBlinkCount(prev => prev + 1);
+                  lastBlinkTimeRef.current = Date.now();
+                  eyeClosedCountRef.current = 0;
+                }
+              }
+            } else {
+              eyeClosedCountRef.current = 0;
+            }
+            
+            // Track rapid eye movements
+            if (gazeCheck.rapidMovement) {
+              setRapidEyeMovements(prev => {
+                const newCount = prev + 1;
+                if (newCount >= 3) {
+                  addViolation(
+                    'suspicious_eye_movement',
+                    'medium',
+                    'Rapid eye movements detected - possible reading from another source',
+                    currentQuestion + 1
+                  );
+                  alert('⚠️ Warning: Unusual eye movements detected!');
+                  return 0;
+                }
+                return newCount;
+              });
+            } else {
+              setRapidEyeMovements(0);
+            }
+            
+            // Check if looking away
             if (gazeCheck.lookingAway) {
-              setEyeStatus('⚠️ Eyes looking away from screen');
+              setEyeStatus(`⚠️ Eyes looking away (EAR: ${gazeCheck.eyeAspectRatio.toFixed(2)})`);
               setConsecutiveEyeViolations(prev => {
                 const newCount = prev + 1;
                 
@@ -349,7 +443,7 @@ export default function InterviewProctor() {
                   addViolation(
                     'eye_gaze_away',
                     'medium',
-                    `Eyes looking away from screen (H: ${gazeCheck.horizontalDeviation.toFixed(2)}, V: ${gazeCheck.verticalDeviation.toFixed(2)})`,
+                    `Eyes looking away from screen (H: ${gazeCheck.horizontalDeviation.toFixed(2)}, V: ${gazeCheck.verticalDeviation.toFixed(2)}, EAR: ${gazeCheck.eyeAspectRatio.toFixed(2)})`,
                     currentQuestion + 1
                   );
                 }
@@ -367,8 +461,11 @@ export default function InterviewProctor() {
                 
                 return newCount;
               });
+            } else if (gazeCheck.isBlinking) {
+              setEyeStatus(`👁️ Blinking (EAR: ${gazeCheck.eyeAspectRatio.toFixed(2)})`);
+              setConsecutiveEyeViolations(0);
             } else {
-              setEyeStatus('✅ Eyes on screen');
+              setEyeStatus(`✅ Eyes on screen (EAR: ${gazeCheck.eyeAspectRatio.toFixed(2)})`);
               setConsecutiveEyeViolations(0);
             }
           }
@@ -387,6 +484,10 @@ export default function InterviewProctor() {
     }
     setFaceDetectionActive(false);
     setConsecutiveEyeViolations(0);
+    setBlinkCount(0);
+    setRapidEyeMovements(0);
+    previousEyePositionRef.current = null;
+    eyeClosedCountRef.current = 0;
   };
 
   // Question timer
