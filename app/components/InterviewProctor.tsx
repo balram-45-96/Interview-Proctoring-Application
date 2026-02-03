@@ -316,7 +316,7 @@ export default function InterviewProctor() {
     const avgEAR = (leftEAR + rightEAR) / 2.0;
     
     // Detect blinks (EAR threshold typically around 0.2-0.25)
-    const isBlinking = avgEAR < 0.25;
+    const isBlinking = avgEAR < 0.22;
     
     // Detect rapid eye movement
     let rapidMovement = false;
@@ -330,8 +330,8 @@ export default function InterviewProctor() {
         Math.pow(rightEyeCenter.y - previousEyePositionRef.current.right.y, 2)
       );
       
-      // If eyes moved more than 15 pixels in 3 seconds, it's rapid movement
-      rapidMovement = (leftMovement > 15 || rightMovement > 15);
+      // If eyes moved more than 25 pixels in 3 seconds, it's rapid movement
+      rapidMovement = (leftMovement > 25 || rightMovement > 25);
     }
     
     // Store current eye positions for next comparison
@@ -341,7 +341,7 @@ export default function InterviewProctor() {
     };
     
     return {
-      lookingAway: normalizedDeviation > 0.3 || normalizedVerticalDeviation > 0.5,
+      lookingAway: normalizedDeviation > 0.5 || normalizedVerticalDeviation > 0.7,
       horizontalDeviation: normalizedDeviation,
       verticalDeviation: normalizedVerticalDeviation,
       isBlinking,
@@ -415,7 +415,7 @@ export default function InterviewProctor() {
             if (gazeCheck.rapidMovement) {
               setRapidEyeMovements(prev => {
                 const newCount = prev + 1;
-                if (newCount >= 3) {
+                if (newCount >= 5) {
                   addViolation(
                     'suspicious_eye_movement',
                     'medium',
@@ -437,8 +437,8 @@ export default function InterviewProctor() {
               setConsecutiveEyeViolations(prev => {
                 const newCount = prev + 1;
                 
-                // Alert after 2 consecutive detections (6 seconds)
-                if (newCount === 2) {
+                // Alert after 3 consecutive detections (9 seconds)
+                if (newCount === 3) {
                   alert('⚠️ Warning: Please keep your eyes on the screen!');
                   addViolation(
                     'eye_gaze_away',
@@ -448,8 +448,8 @@ export default function InterviewProctor() {
                   );
                 }
                 
-                // Critical violation after 4 consecutive detections (12 seconds)
-                if (newCount >= 4) {
+                // Critical violation after 6 consecutive detections (18 seconds)
+                if (newCount >= 6) {
                   addViolation(
                     'prolonged_eye_gaze_away',
                     'critical',
